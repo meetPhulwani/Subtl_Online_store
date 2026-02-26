@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUBTL | cart</title>
+
+    <style>
+        body {
+            background: linear-gradient(to right, white, rgb(199,255,193));
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 30px;
+        }
+
+        #logo { height: 100px; }
+
+        .cart-container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .clear-btn {
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #ff4d4d;
+            color: white;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cart-wrapper { display: flex; gap: 30px; }
+        .cart-items { flex: 2; }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .item-info { flex: 1; margin-left: 20px; }
+        .price { font-weight: bold; }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .qty-box button {
+            padding: 4px 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background: white;
+        }
+
+        .price-box {
+            flex: 1;
+            background: #f4f7f5;
+            padding: 20px;
+            border-radius: 12px;
+            height: max-content;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .price-row.discount { color: green; }
+        .price-row.total { font-weight: bold; font-size: 18px; }
+
+        .checkout-btn {
+            margin-top: 20px;
+            padding: 12px;
+            background: #52b788;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+<img src="/subtl_black.png" id="logo" alt="">
+
+<div class="cart-container">
+    <h2>Your Cart</h2>
+
+    <% if (cartItems && cartItems.length > 0) { %>
+    <button class="clear-btn" onclick="updateCart(null,'clear')">
+        Clear Cart
+    </button>
+    <% } %>
+
+
+    <% if (!cartItems || cartItems.length === 0) { %>
+        <div class="empty">Your cart is empty 🛒</div>
+    <% } else { %>
+
+    <div class="cart-wrapper">
+
+        <div class="cart-items">
+            <% for (let i = 0; i < cartItems.length; i++) {
+                const item = cartItems[i];
+                const product = item.product;
+
+                if (!product) continue;   // 🔒 SAFETY GUARD
+            %>
+
+            <div class="cart-item" id="cart-item-<%= product._id %>">
+                <% if (product.image && product.image.data) { %>
+                    <img src="data:<%= product.image.contentType %>;base64,<%= product.image.data.toString('base64') %>">
+                <% } else { %>
+                    <div style="width:80px;height:80px;background:#eee;
+                        display:flex;align-items:center;justify-content:center;
+                        border-radius:8px;font-size:12px;">
+                        No Image
+                    </div>
+                <% } %>
+
+                <div class="item-info">
+                    <p><strong><%= product.name %></strong></p>
+                    <p class="price">Rs. <%= product.price %></p>
+
+                    <div class="qty-box">
+                        <button type="button"id="minus-<%= product._id %>"onclick="updateCart('<%= product._id %>','decrease')"style="background-color:#55555500;color:#52b788;border:none;font-size:x-large;"
+                        <%= item.quantity === 1 ? 'disabled' : '' %>>−</button>
+                        <span id="qty-<%= product._id %>"><%= item.quantity %></span>
+                        <button onclick="updateCart('<%= product._id %>','increase')"style="background-color: #55555500;color: #52b788;border: none;font-size: x-large;">+</button>
+                    </div>
+                    <button
+                    type="button"
+                    style="margin-top:8px;color:red;background:none;border:none;cursor:pointer;"
+                    onclick="updateCart('<%= product._id %>', 'remove')">Remove</button>
+
+                </div>
+
+            </div>
+            <% } %>
+        </div>
+
+        <div class="price-box">
+            <div class="price-row"><span>Subtotal</span><span id="subtotal"><%= subtotal %></span></div>
+            <div class="price-row discount"><span>Product Discount</span><span id="productDiscount"><%= productDiscount %></span></div>
+            <div class="price-row discount"><span>Extra Discount</span><span id="extraDiscount"><%= extraDiscount %></span></div>
+            <div class="price-row"><span>Delivery Fee</span><span id="deliveryFee"><%= deliveryFee === 0 ? 'FREE' : deliveryFee %></span></div>
+            <div class="price-row"><span>Platform Fee</span><span id="platformFee"><%= platformFee %></span></div>
+            <div class="price-row total"><span>Total</span><span id="total"><%= total %></span></div>
+
+            <a href="/checkout" class="checkout-btn">Proceed to Checkout</a>
+        </div>
+
+    </div>
+    <% } %>
+</div>
+
+<script>
+async function updateCart(productId, action) {
+    try {
+        const res = await fetch('/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, action })
+        });
+
+        const data = await res.json();
+
+        // 🔁 CART EMPTY → FULL CLEAN RENDER
+        if (data.reload) {
+            location.reload();
+            return;
+        }
+
+        // UPDATE QUANTITY
+        if (productId && data.quantity !== undefined) {
+    const qtyEl = document.getElementById(`qty-${productId}`);
+    const minusBtn = document.getElementById(`minus-${productId}`);
+
+    if (qtyEl) qtyEl.innerText = data.quantity;
+
+    if (minusBtn) {
+        minusBtn.disabled = data.quantity === 1;
+        minusBtn.style.opacity = data.quantity === 1 ? "0.5" : "1";
+        minusBtn.style.cursor = data.quantity === 1 ? "not-allowed" : "pointer";
+    }
+}
+
+
+        // UPDATE PRICE BOX
+        document.getElementById("subtotal").innerText = data.subtotal ?? 0;
+        document.getElementById("productDiscount").innerText = data.productDiscount ?? 0;
+        document.getElementById("extraDiscount").innerText = data.extraDiscount ?? 0;
+        document.getElementById("deliveryFee").innerText =
+            data.deliveryFee === 0 ? "FREE" : data.deliveryFee;
+        document.getElementById("platformFee").innerText = data.platformFee ?? 0;
+        document.getElementById("total").innerText = data.total ?? 0;
+
+    } catch (err) {
+        console.error("Cart update failed", err);
+    }
+}
+</script>
+
+
+
+</body>
+</html>

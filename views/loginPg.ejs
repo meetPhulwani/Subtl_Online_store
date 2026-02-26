@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous"/>
+
+    <style>
+        *{padding:0;margin:0;font-family:Arial,Helvetica,sans-serif;}
+
+        body{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:720px;
+            background:linear-gradient(to right,white,rgb(199,255,193));
+        }
+
+        .container{
+            height:500px;
+            width:820px;
+            border-radius:25px;
+            box-shadow:0 0 10px rgb(186,186,186);
+            background-color:white;
+        }
+
+        #mainSide{
+            height:500px;
+            width:400px;
+            transition:1s ease-out;
+            position:absolute;
+            top:110px;
+            left:358px;
+        }
+
+        #sideBox{
+            height:500px;
+            width:400px;
+            background-color:#52b788;
+            position:absolute;
+            top:110px;
+            left:778px;
+            border-radius:120px 25px 25px 120px;
+            transition:1s ease-out;
+        }
+
+        .logInContainer{
+            width:420px;
+            display:flex;
+            justify-content:center;
+            transition:1.5s ease-out;
+        }
+
+        #logInHeading{
+            margin-top:60px;
+            transition:0.5s ease-out;
+        }
+
+        .accBtn{margin-left:108px;}
+
+        button{
+            background-color:white;
+            height:35px;width:35px;
+            border-radius:7px;
+            margin-top:30px;margin-left:10px;
+            outline:none;border:none;
+            box-shadow:0 0 2px rgb(186,186,186);
+            cursor:pointer;
+        }
+
+        #or{margin-left:197px;margin-top:25px;}
+
+        .mailPass{
+            height:100px;width:250px;
+            margin-top:25px;margin-left:65px;
+        }
+
+        .name{
+            height:33px;width:300px;border-radius:5px;
+            border:none;background-color:rgb(219,219,219);
+            padding-left:7px;outline:none;margin-bottom:20px;
+        }
+
+        .hide{display:none;}
+
+        #mail,#pass{
+            height:33px;width:300px;border-radius:5px;
+            border:none;background-color:rgb(219,219,219);
+            padding-left:7px;outline:none;
+        }
+
+        #pass{margin-top:20px;}
+
+        #showPass{margin-left:67px;background:white;cursor:pointer;}
+
+        #showPassText{
+            font-size:small;position:relative;
+            top:-17.8px;left:85px;
+            color: #52b788;
+        }
+
+        #forgotPass{
+            text-decoration:none;
+            font-size:15px;color:rgb(158,158,158);
+            width:420px;height:50px;
+            display:flex;justify-content:center;align-items:center;
+        }
+
+        #loginBtn{
+            background-color:#52b788;width:110px;height:40px;
+            display:flex;justify-content:center;align-items:center;
+            border-radius:5px;color:white;font-size:18px;
+            margin-left:152px;cursor:pointer;
+            margin-top: 0;
+        }
+
+        #greet{
+            width:400px;display:flex;
+            justify-content:center;margin-top:150px;
+            color:white;
+        }
+
+        #sideBoxPara{
+            display:flex;justify-content:center;
+            align-items:center;height:100px;color:white;
+        }
+
+        #signUpBtn{
+            width:110px;height:40px;display:flex;
+            justify-content:center;align-items:center;
+            background-color:transparent;
+            outline:2px solid white;border-radius:5px;
+            color:white;margin-left:143px;margin-top:10px;
+            cursor:pointer;
+        }
+
+        .flash-box{
+            animation: fadeOut 4s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {opacity:1;}
+            70%{opacity:1;}
+            100%{opacity:0;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FLASH MESSAGES -->
+    <% if (typeof success !== "undefined" && success.length > 0) { %>
+    <div class="flash-box" style="
+        position:absolute;top:20px;left:50%;
+        transform:translateX(-50%);
+        background-color:#52b788;padding:12px 25px;
+        border-radius:8px;color:white;font-size:18px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
+        <%= success[0] %>
+    </div>
+    <% } %>
+
+    <% if (typeof error !== "undefined" && error.length > 0) { %>
+    <div class="flash-box" style="
+        position:absolute;top:20px;left:50%;
+        transform:translateX(-50%);
+        background-color:#ff4d4d;padding:12px 25px;
+        border-radius:8px;color:white;font-size:18px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
+        <%= error[0] %>
+    </div>
+    <% } %>
+
+    <div class="mainBody">
+        <div class="container">
+
+            <div id="mainSide">           
+                <div class="logInContainer">
+                    <h1 id="logInHeading">Log In</h1>
+                </div>
+
+                <div class="accBtn">
+                    <button><i class="fa-brands fa-google"></i></button>
+                    <button><i class="fa-brands fa-facebook"></i></button>
+                    <button><i class="fa-brands fa-github"></i></button>
+                    <button><i class="fa-brands fa-linkedin"></i></button>
+                </div>
+
+                <p id="or">OR</p>
+
+                <!-- FORM -->
+                <form action="/users/login" id="authForm" method="POST">
+                    <div class="mailPass">
+                        <input type="text" class="name hide" name="fullName" placeholder="Name">
+                        <input type="text" id="mail" name="email" placeholder="Mail">
+                        <input type="password" id="pass" name="password" placeholder="Password">
+                    </div>
+
+                    <input id="showPass" type="checkbox">
+                    <p id="showPassText"><b>Show Password</b></p>
+
+                    <a href="/users/forgot-password" id="forgotPass">Forget your password?</a>
+
+                    <button id="loginBtn" type="submit">Log In</button>
+                </form>
+
+            </div>  
+
+            <div id="sideBox">  
+                <h1 id="greet">Welcome back!</h1>
+                <p id="sideBoxPara">Register if you don't have an account</p>
+                <div id="signUpBtn">Sign Up</div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+        const signUpBtn = document.querySelector("#signUpBtn");
+        const sideBox = document.querySelector("#sideBox");
+        let SignUpBtn = true;
+        const sideBoxPara = document.querySelector("#sideBoxPara");
+        const greet = document.querySelector("#greet");
+        const mainSide = document.querySelector("#mainSide");
+        const logInHeading = document.querySelector("#logInHeading");
+        const pass = document.querySelector("#pass");
+        const showPass = document.querySelector("#showPass");
+        const Name = document.querySelector(".name");
+        const forgot = document.querySelector("#forgotPass");
+        const showPassText = document.querySelector("#showPassText");
+        const loginBtn = document.querySelector("#loginBtn");
+        const form = document.querySelector("#authForm");
+
+        showPass.addEventListener("click",()=>{
+            pass.type = pass.type==="password" ? "text" : "password";
+        });
+
+        function shiftBox(x,y){
+            sideBox.style.left = x+"px";
+            sideBox.style.top = y+"px";
+        }
+
+        function mainSideShift(x,y){
+            mainSide.style.left = x+"px";
+            mainSide.style.top = y+"px";
+        }
+
+        signUpBtn.addEventListener("click",() =>{
+            if(SignUpBtn){
+                form.action = "/users/register";
+                signUpBtn.innerText = "Log In";
+                SignUpBtn = false;
+                sideBoxPara.innerText = "Login if you already have an account";
+                greet.innerText="Hello, Friend!";
+                shiftBox(358,110);
+                mainSideShift(750,110);
+                sideBox.style.borderRadius="25px 120px 120px 25px";
+                logInHeading.innerText ="Create Account";
+                Name.classList.remove("hide");
+                showPass.style.display="none";
+                forgot.style.display="none";
+                showPassText.style.display="none";
+                loginBtn.innerText ="Register";
+                loginBtn.style.margin="80px 100px 100px 160px";
+
+            } else {
+                form.action = "/users/login";
+                signUpBtn.innerText = "Sign Up";
+                SignUpBtn = true;
+                sideBoxPara.innerText = "Register if you don't have an account";
+                greet.innerText="Welcome back!";
+                shiftBox(778,110);
+                mainSideShift(358,110);
+                sideBox.style.borderRadius="120px 25px 25px 120px";
+                logInHeading.innerText ="Log in";
+                Name.classList.add("hide");
+                showPass.style.display="inline";
+                forgot.style.display="flex";
+                showPassText.style.display="block";
+                loginBtn.innerText ="Log In";
+                loginBtn.style.margin="0 0 0 152px";
+            }
+        });
+
+
+    setTimeout(() => {
+        const boxes = document.querySelectorAll(".flash-box");
+        boxes.forEach(box => {
+            box.style.transition = "opacity 0.5s ease";
+            box.style.opacity = "0";
+            setTimeout(() => box.remove(), 500);
+        });
+    }, 2000);
+
+    </script>
+
+</body>
+</html>

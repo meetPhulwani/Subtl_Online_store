@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" href="../public/SUBTL_black.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>SUBTL | Store</title>
+     <style>
+
+        body{
+            height:700px;
+            background:linear-gradient(to right,white,rgb(199,255,193));
+        }
+        #logo{
+            height: 110px;
+        }
+        p{
+            font-family: Arial, Helvetica, sans-serif;
+            width: max-content;
+            cursor: pointer;
+        }
+        .sidePanel{
+            display: inline;
+            width: 200px;
+        }
+        #filter{
+            position: relative;
+            top: 370px;
+            margin-left: 20px;
+        }
+        #sortBy{
+            position: relative;
+            top: 370px;
+            margin-left: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .topPanel{
+            display:flex;
+            width: 95%;
+            height: min-content;
+            gap: 30px;
+            justify-content: end;
+            position: absolute;
+            top: 40px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .mainPanel{
+            width: 80%;
+            height: 80%;
+            position: absolute;
+            top: 100px;
+            left: 200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-auto-rows: 300px;
+            gap: 15px;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #productBox{
+            height: 300px;
+            width: 220px;
+            background-color: rgb(255, 255, 255);
+            margin: 5px;
+            border: solid 1px rgba(168, 168, 168, 0.56);
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        #imgBox{
+            width: 100%;
+            height: 70%;
+            background-color: var(--bg);
+            border-radius: 10px;
+        }
+        #panelBox{
+            background-color: var(--panel);
+            color: var(--text);
+            width: 100%;
+            height: 30%;
+            border-radius: 0 0 10px 10px;
+        }
+        i{
+        }
+        h3{
+            margin: 0;
+            padding: 5px;
+            font-family: Arial, Helvetica, sans-serif;
+            width:max-content;
+        }
+        h4{
+            margin: 0;
+            padding: 5px;
+            font-family: Arial, Helvetica, sans-serif;
+            width:max-content;
+        }
+        a{
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <% if (success && success.length > 0) { %>
+    <div class="flash-box" style="
+        position:absolute;top:20px;left:50%;
+        transform:translateX(-50%);
+        background-color:#52b788;padding:12px 25px;
+        border-radius:8px;color:white;font-size:18px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
+        <%= success[0] %>
+    </div>
+    <% } %>
+    <% if (error && error.length > 0) { %>
+    <div class="flash-box" style="
+        position:absolute;top:20px;left:50%;
+        transform:translateX(-50%);
+        background-color:#ff4d4d;padding:12px 25px;
+        border-radius:8px;color:white;font-size:18px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
+        <%= error[0] %>
+    </div>
+    <% } %>
+
+    <img src="/subtl_black.png" id="logo" alt="">
+
+        <div class="topPanel">
+        <a href="http://localhost:3000/shop" style="font-size: large;">Shop</a>
+        <a href="/cart" style="font-size: large;">Cart</a>
+        <a href="" style="font-size: large;">Profile</a>
+        <a href="/users/logout" style="font-size: large;color: red;"> <b>Logout</b></a>
+        </div>
+
+    <div class="sidePanel">
+        <p style="margin-left: 15px;">All Products</p>
+        <p style="margin-left: 15px;">New Products</p>
+        <p style="margin-left: 15px;">Discounted Products</p>
+
+        <form method="GET" action="/shop" id="sortBy" style="margin-left:20px;">
+    <label><b>Sort by :</b></label><br>
+
+    <select name="sort" onchange="this.form.submit()"
+        style="margin-top:6px;padding:6px;border-radius:6px;outline: none;background-color: transparent;">
+        <option value="">Shop</option>
+        <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>
+            Price: Lowest First
+        </option>
+        <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>
+            Price: Highest First
+        </option>
+    </select>
+</form>
+
+        <p id="filter"><b>Filter</b></p>
+
+        <div class="mainPanel">
+        <% products.forEach(function(product){ %>
+            <div id="productBox" >
+                <div id="imgBox" style="--bg: <%= product.bgcolor %>;">
+               <% if (product.image && product.image.data) { %>
+                <img src="data:<%= product.image.contentType %>;base64,<%= product.image.data.toString('base64') %>"style="border-radius:10px 10px 0 0;width:100%; height:100%; object-fit:cover;"alt="product image"/>
+            <% } else { %>
+            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#eee;font-family: Arial, Helvetica, sans-serif;">
+            No Image
+            </div>
+            <% } %>
+
+                </div>
+                <div style="--panel: <%= product.panelcolor %>; --text: <%= product.textcolor %>;" id="panelBox">
+                    <h3><%= product.name %></h3>
+                    <h4>Rs.<%= product.price %></h4>
+                    <a href="/addToCart/<%= product._id %>" style=" color: var(--text);text-decoration: none;font-size: x-large;position: relative;left: 80%;top: -30%; --text: <%= product.textcolor %>;">
+                        <i class="fa-solid fa-circle-plus"></i>
+                    </a>
+                </div>
+            </div>
+        <% }) %>
+
+
+
+    </div>
+
+    <script>
+    setTimeout(() => {
+        const boxes = document.querySelectorAll(".flash-box");
+        boxes.forEach(box => {
+            box.style.transition = "opacity 0.5s ease";
+            box.style.opacity = "0";
+            setTimeout(() => box.remove(), 500);
+        });
+    }, 2000);
+
+    </script>
+</body>
+</html>
