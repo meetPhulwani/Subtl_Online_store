@@ -1,32 +1,45 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const ownerModel = require('../models/ownerModel');
+const isOwnerLoggedIn = require('../middlewares/isOwnerLoggedIn');
+const { loginOwner, logoutOwner } = require('../controllers/ownerController');
 
+router.get("/login", (req, res) => {
+    res.render("ownerLogin", {
+        success: req.flash("success"),
+        error: req.flash("error"),
+    });
+});
 
-if(process.env.NODE_ENV === "development"){
+router.post("/login", loginOwner);
+router.get("/logout", logoutOwner);
 
-router.post('/create', async (req,res)=>{
+if (process.env.NODE_ENV === "development") {
+    router.post('/create', async (req, res) => {
+        let owners = await ownerModel.find();
 
-    let owners = await ownerModel.find();
+        if (owners.length > 0) return res.sendStatus(503);
 
-    if(owners.length> 0) return res.sendStatus(503);
+        let { fullName, email, contact, password } = req.body;
 
-    let{fullName,email,contact,password} = req.body;
+        const hash = await bcrypt.hash(password, 10);
 
-    let createdOwner = await ownerModel.create({
-    fullName,
-    email,
-    contact,
-    password,
-    })
-    res.status(201).send("ownerCreated");
-})
+        await ownerModel.create({
+            fullName,
+            email,
+            contact,
+            password: hash,
+        });
+
+        res.status(201).send("ownerCreated");
+    });
 }
 
-router.get('/admin',(req,res)=>{
-    let success = req.flash('success')
-    let error = req.flash('error')
-    res.render('createProducts', { success , error });
-})
+router.get('/admin', isOwnerLoggedIn, (req, res) => {
+    let success = req.flash('success');
+    let error = req.flash('error');
+    res.render('createProducts', { success, error });
+});
 
 module.exports = router;

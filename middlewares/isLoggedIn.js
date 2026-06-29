@@ -11,13 +11,21 @@ module.exports = async (req, res , next)=>{
     }
 
     try{
-        let decoded =jwt.verify(token, process.env.JWT_KEY);
+        let decoded = jwt.verify(token, process.env.JWT_KEY);
         let user = await userModel.findOne({email: decoded.email}).select('-password');
+
+        if (!user) {
+            res.clearCookie("token");
+            req.flash("error", "login first");
+            return res.redirect("/login");
+        }
+
         req.user = user;
         next();
     }
     catch(err){
-        req.flash("error","something went wrong");
+        res.clearCookie("token");
+        req.flash("error", "Session expired. Please login again.");
         return res.redirect('/login');
     }
 

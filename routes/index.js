@@ -3,8 +3,12 @@ const router = express.Router();
 const isLoggedIn = require('../middlewares/isLoggedIn');
 const productModel = require('../models/productModel');
 const userModel = require('../models/userModel');
+const calculateCartTotals = require('../utils/cartTotals');
 
-// LOGIN PAGE
+router.get("/", (req, res) => {
+    res.render("app");
+});
+
 router.get("/login", (req, res) => {
     res.render('loginPg', {
         success: req.flash("success"),
@@ -12,7 +16,6 @@ router.get("/login", (req, res) => {
     });
 });
 
-// ADD TO CART
 router.get('/addToCart/:productId', isLoggedIn, async (req, res) => {
     try {
         const user = await userModel.findById(req.user._id);
@@ -42,49 +45,16 @@ router.get('/addToCart/:productId', isLoggedIn, async (req, res) => {
     }
 });
 
-
-
-
-// CART PAGE (WITH PRICE DETAILS)
 router.route('/cart').get(isLoggedIn, async (req, res) => {
     const user = await userModel
         .findById(req.user._id)
         .populate("cart.product");
 
-    let subtotal = 0;
-    let productDiscount = 0;
-
-    user.cart.forEach(item => {
-        // 🔒 SAFETY CHECK (IMPORTANT)
-        if (!item.product || !item.quantity) return;
-
-        subtotal += item.product.price * item.quantity;
-
-        if (item.product.discount) {
-            productDiscount += item.product.discount * item.quantity;
-        }
-    });
-
-    let extraDiscount = subtotal > 2000 ? Math.floor(subtotal * 0.10) : 0;
-    let deliveryFee = subtotal > 1500 ? 0 : 80;
-    let platformFee = subtotal > 1500 ? 0 : 20;
-
-
-    let total =
-        subtotal -
-        productDiscount -
-        extraDiscount +
-        deliveryFee +
-        platformFee;
+    const totals = calculateCartTotals(user.cart);
 
     res.render('cart', {
         cartItems: user.cart,
-        subtotal,
-        productDiscount,
-        extraDiscount,
-        deliveryFee,
-        platformFee,
-        total
+        ...totals
     });
 })
 
@@ -95,7 +65,6 @@ router.route('/cart').get(isLoggedIn, async (req, res) => {
         .findById(req.user._id)
         .populate("cart.product");
 
-    // CLEAR CART
     if (action === "clear") {
         user.cart = [];
         await user.save();
@@ -108,7 +77,6 @@ router.route('/cart').get(isLoggedIn, async (req, res) => {
 
     if (!item) return res.json({ reload: true });
 
-    // REMOVE ITEM
     if (action === "remove") {
         user.cart = user.cart.filter(
             i => i.product._id.toString() !== productId
@@ -117,12 +85,10 @@ router.route('/cart').get(isLoggedIn, async (req, res) => {
         return res.json({ reload: true });
     }
 
-    // INCREASE
     if (action === "increase") {
         item.quantity += 1;
     }
 
-    // DECREASE
     if (action === "decrease") {
         if (item.quantity > 1) {
             item.quantity -= 1;
@@ -135,27 +101,7 @@ router.route('/cart').get(isLoggedIn, async (req, res) => {
 
     await user.save();
 
-    // RECALCULATE TOTALS
-    let subtotal = 0;
-    let productDiscount = 0;
-
-    user.cart.forEach(i => {
-        subtotal += i.product.price * i.quantity;
-        if (i.product.discount) {
-            productDiscount += i.product.discount * i.quantity;
-        }
-    });
-
-    let extraDiscount = subtotal > 2000 ? Math.floor(subtotal * 0.10) : 0;
-    let deliveryFee = subtotal > 1500 ? 0 : 80;
-    let platformFee = subtotal > 1500 ? 0 : 20;
-
-    let total =
-        subtotal -
-        productDiscount -
-        extraDiscount +
-        deliveryFee +
-        platformFee;
+    const totals = calculateCartTotals(user.cart);
 
     if (user.cart.length === 0) {
         return res.json({ reload: true });
@@ -163,16 +109,67 @@ router.route('/cart').get(isLoggedIn, async (req, res) => {
 
     res.json({
         quantity: item.quantity,
-        subtotal,
-        productDiscount,
-        extraDiscount,
-        deliveryFee,
-        platformFee,
-        total
+        ...totals
     });
 });
 
-// SHOP PAGE
+router.get('/checkout', isLoggedIn, async (req, res) => {
+    const user = await userModel
+        .findById(req.user._id)
+        .populate("cart.product");
+
+    if (!user.cart.length) {
+        req.flash("error", "Your cart is empty");
+        return res.redirect("/cart");
+    }
+
+    const totals = calculateCartTotals(user.cart);
+
+    res.render("checkout", {
+        cartItems: user.cart,
+        ...totals,
+        success: req.flash("success"),
+        error: req.flash("error"),
+    });
+});
+
+router.post('/checkout', isLoggedIn, async (req, res) => {
+    try {
+        const user = await userModel
+            .findById(req.user._id)
+            .populate("cart.product");
+
+        if (!user.cart.length) {
+            req.flash("error", "Your cart is empty");
+            return res.redirect("/cart");
+        }
+
+        const productIds = user.cart.map((item) => item.product._id);
+        user.order.push(...productIds);
+        user.cart = [];
+        await user.save();
+
+        req.flash("success", "Order placed successfully!");
+        res.redirect("/shop");
+    } catch (err) {
+        console.log(err);
+        req.flash("error", "Checkout failed");
+        res.redirect("/checkout");
+    }
+});
+
+router.get('/profile', isLoggedIn, async (req, res) => {
+    const user = await userModel
+        .findById(req.user._id)
+        .populate("order");
+
+    res.render("profile", {
+        user,
+        success: req.flash("success"),
+        error: req.flash("error"),
+    });
+});
+
 router.get('/shop', isLoggedIn, async (req, res) => {
     const { sort } = req.query;
 

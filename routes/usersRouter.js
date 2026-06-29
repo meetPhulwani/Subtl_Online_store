@@ -11,11 +11,11 @@ router.get("/forgot-password", (req, res) => {
 });
 
 router.get("/reset-password/:token", (req, res) => {
-    res.render("reset-password", { token: req.params.token });
+    res.render("resetPass", { token: req.params.token });
 });
 
 router.post("/forgot-password", forgotPassword);
-router.post('/resetPass/:token', resetPassword);
+router.post("/reset-password/:token", resetPassword);
 
 
 module.exports = router;

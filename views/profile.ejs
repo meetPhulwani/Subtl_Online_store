@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SUBTL | Account</title>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/cart.css">
+</head>
+<body class="store">
+
+    <%- include('partials/flash') %>
+    <%- include('partials/navbar', { active: 'profile' }) %>
+
+    <div class="page">
+        <div class="card profile-card">
+            <div class="card-body">
+                <div class="profile-header">
+                    <div class="avatar"><%= user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U' %></div>
+                    <div>
+                        <h1 class="profile-name"><%= user.fullName %></h1>
+                        <p class="profile-email"><%= user.email %></p>
+                    </div>
+                </div>
+
+                <div class="profile-grid">
+                    <div class="profile-field">
+                        <label>Full Name</label>
+                        <span><%= user.fullName %></span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Email</label>
+                        <span><%= user.email %></span>
+                    </div>
+                </div>
+
+                <h3 class="section-title section-title--spaced">Order History</h3>
+
+                <% if (user.order && user.order.length > 0) { %>
+                    <div class="order-list">
+                        <% user.order.forEach(function(product) { %>
+                            <% if (product) { %>
+                            <div class="order-item">
+                                <span><%= product.name %></span>
+                                <span class="price">Rs.<%= product.price %></span>
+                            </div>
+                            <% } %>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state empty-state--compact">
+                        <p>No orders yet.</p>
+                        <a href="/shop" class="btn btn-outline">Start Shopping</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

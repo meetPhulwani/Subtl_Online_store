@@ -1,197 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="apple-touch-icon" href="../public/SUBTL_black.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>SUBTL | Store</title>
-     <style>
-
-        body{
-            height:700px;
-            background:linear-gradient(to right,white,rgb(199,255,193));
-        }
-        #logo{
-            height: 110px;
-        }
-        p{
-            font-family: Arial, Helvetica, sans-serif;
-            width: max-content;
-            cursor: pointer;
-        }
-        .sidePanel{
-            display: inline;
-            width: 200px;
-        }
-        #filter{
-            position: relative;
-            top: 370px;
-            margin-left: 20px;
-        }
-        #sortBy{
-            position: relative;
-            top: 370px;
-            margin-left: 20px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        .topPanel{
-            display:flex;
-            width: 95%;
-            height: min-content;
-            gap: 30px;
-            justify-content: end;
-            position: absolute;
-            top: 40px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        .mainPanel{
-            width: 80%;
-            height: 80%;
-            position: absolute;
-            top: 100px;
-            left: 200px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            grid-auto-rows: 300px;
-            gap: 15px;
-            padding: 10px;
-            overflow-y: auto;
-        }
-        #productBox{
-            height: 300px;
-            width: 220px;
-            background-color: rgb(255, 255, 255);
-            margin: 5px;
-            border: solid 1px rgba(168, 168, 168, 0.56);
-            cursor: pointer;
-            border-radius: 10px;
-        }
-        #imgBox{
-            width: 100%;
-            height: 70%;
-            background-color: var(--bg);
-            border-radius: 10px;
-        }
-        #panelBox{
-            background-color: var(--panel);
-            color: var(--text);
-            width: 100%;
-            height: 30%;
-            border-radius: 0 0 10px 10px;
-        }
-        i{
-        }
-        h3{
-            margin: 0;
-            padding: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-            width:max-content;
-        }
-        h4{
-            margin: 0;
-            padding: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-            width:max-content;
-        }
-        a{
-            text-decoration: none;
-            color: black;
-        }
-    </style>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/shop.css">
 </head>
-<body>
+<body class="store">
 
-    <% if (success && success.length > 0) { %>
-    <div class="flash-box" style="
-        position:absolute;top:20px;left:50%;
-        transform:translateX(-50%);
-        background-color:#52b788;padding:12px 25px;
-        border-radius:8px;color:white;font-size:18px;
-        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
-        <%= success[0] %>
-    </div>
-    <% } %>
-    <% if (error && error.length > 0) { %>
-    <div class="flash-box" style="
-        position:absolute;top:20px;left:50%;
-        transform:translateX(-50%);
-        background-color:#ff4d4d;padding:12px 25px;
-        border-radius:8px;color:white;font-size:18px;
-        box-shadow:0 0 10px rgba(0,0,0,0.2);z-index:2000;">
-        <%= error[0] %>
-    </div>
-    <% } %>
+    <%- include('partials/flash') %>
+    <%- include('partials/navbar', { active: 'shop' }) %>
 
-    <img src="/subtl_black.png" id="logo" alt="">
+    <div class="page">
+        <div class="shop-layout">
+            <aside class="card shop-sidebar">
+                <p class="shop-sidebar__title">Browse</p>
+                <span class="sidebar-item">All Products</span>
+                <span class="sidebar-item">New Arrivals</span>
+                <span class="sidebar-item">On Sale</span>
 
-        <div class="topPanel">
-        <a href="http://localhost:3000/shop" style="font-size: large;">Shop</a>
-        <a href="/cart" style="font-size: large;">Cart</a>
-        <a href="" style="font-size: large;">Profile</a>
-        <a href="/users/logout" style="font-size: large;color: red;"> <b>Logout</b></a>
+                <p class="shop-sidebar__title">Sort by</p>
+                <form method="GET" action="/shop">
+                    <select name="sort" class="sort-select" onchange="this.form.submit()">
+                        <option value="">Default</option>
+                        <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                        <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                        <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                    </select>
+                </form>
+            </aside>
+
+            <main>
+                <div class="shop-toolbar">
+                    <h1>All Products</h1>
+                    <p><%= products.length %> item<%= products.length !== 1 ? 's' : '' %></p>
+                </div>
+
+                <div class="product-grid">
+                    <% products.forEach(function(product){ %>
+                    <article class="product-card">
+                        <div class="product-card__media">
+                            <div class="product-img-wrap" style="--bg: <%= product.bgcolor || '#f5f5f5' %>;">
+                                <% if (product.discount && product.discount > 0) { %>
+                                    <span class="product-badge">Sale</span>
+                                <% } %>
+                                <div class="product-actions-top">
+                                    <button type="button" class="wishlist-btn" aria-label="Add to wishlist">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
+                                </div>
+                                <% if (product.image && product.image.data) { %>
+                                    <img src="data:<%= product.image.contentType %>;base64,<%= product.image.data.toString('base64') %>" alt="<%= product.name %>">
+                                <% } else { %>
+                                    <div class="product-img-placeholder">No Image</div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="product-card__body">
+                            <h3 class="product-name"><%= product.name %></h3>
+                            <div class="product-pricing">
+                                <span class="product-price">Rs.<%= product.price %></span>
+                                <% if (product.discount && product.discount > 0) { %>
+                                    <span class="product-price--old">Rs.<%= product.price + product.discount %></span>
+                                    <span class="product-price--save">Save Rs.<%= product.discount %></span>
+                                <% } %>
+                            </div>
+                            <a href="/addToCart/<%= product._id %>" class="product-card__cta">Add to Bag</a>
+                        </div>
+                    </article>
+                    <% }) %>
+                </div>
+            </main>
         </div>
-
-    <div class="sidePanel">
-        <p style="margin-left: 15px;">All Products</p>
-        <p style="margin-left: 15px;">New Products</p>
-        <p style="margin-left: 15px;">Discounted Products</p>
-
-        <form method="GET" action="/shop" id="sortBy" style="margin-left:20px;">
-    <label><b>Sort by :</b></label><br>
-
-    <select name="sort" onchange="this.form.submit()"
-        style="margin-top:6px;padding:6px;border-radius:6px;outline: none;background-color: transparent;">
-        <option value="">Shop</option>
-        <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>
-            Price: Lowest First
-        </option>
-        <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>
-            Price: Highest First
-        </option>
-    </select>
-</form>
-
-        <p id="filter"><b>Filter</b></p>
-
-        <div class="mainPanel">
-        <% products.forEach(function(product){ %>
-            <div id="productBox" >
-                <div id="imgBox" style="--bg: <%= product.bgcolor %>;">
-               <% if (product.image && product.image.data) { %>
-                <img src="data:<%= product.image.contentType %>;base64,<%= product.image.data.toString('base64') %>"style="border-radius:10px 10px 0 0;width:100%; height:100%; object-fit:cover;"alt="product image"/>
-            <% } else { %>
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#eee;font-family: Arial, Helvetica, sans-serif;">
-            No Image
-            </div>
-            <% } %>
-
-                </div>
-                <div style="--panel: <%= product.panelcolor %>; --text: <%= product.textcolor %>;" id="panelBox">
-                    <h3><%= product.name %></h3>
-                    <h4>Rs.<%= product.price %></h4>
-                    <a href="/addToCart/<%= product._id %>" style=" color: var(--text);text-decoration: none;font-size: x-large;position: relative;left: 80%;top: -30%; --text: <%= product.textcolor %>;">
-                        <i class="fa-solid fa-circle-plus"></i>
-                    </a>
-                </div>
-            </div>
-        <% }) %>
-
-
-
     </div>
+
+    <%- include('partials/footer') %>
 
     <script>
-    setTimeout(() => {
-        const boxes = document.querySelectorAll(".flash-box");
-        boxes.forEach(box => {
-            box.style.transition = "opacity 0.5s ease";
-            box.style.opacity = "0";
-            setTimeout(() => box.remove(), 500);
-        });
-    }, 2000);
-
+        setTimeout(function () {
+            document.querySelectorAll('.flash-box').forEach(function (box) { box.remove(); });
+        }, 4000);
     </script>
 </body>
 </html>

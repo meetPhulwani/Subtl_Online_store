@@ -1,0 +1,43 @@
+<% var navActive = typeof active !== 'undefined' ? active : ''; %>
+<header class="navbar" id="navbar">
+    <a href="/shop" class="navbar__logo">
+        <img src="/subtl_black.svg" alt="SUBTL">
+    </a>
+    <nav class="navbar__links" id="navLinks">
+        <a href="/shop" class="nav-link <%= navActive === 'shop' ? 'active' : '' %>">Shop</a>
+        <a href="/cart" class="nav-link <%= navActive === 'cart' ? 'active' : '' %>">Cart</a>
+        <a href="/profile" class="nav-link <%= navActive === 'profile' ? 'active' : '' %>">Account</a>
+        <a href="/users/logout" class="nav-link nav-link--muted">Sign Out</a>
+    </nav>
+    <button class="navbar__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<script>
+(function () {
+    var navbar = document.getElementById('navbar');
+    var toggle = document.getElementById('navToggle');
+    var links = document.getElementById('navLinks');
+
+    if (navbar) {
+        window.addEventListener('scroll', function () {
+            navbar.classList.toggle('scrolled', window.scrollY > 8);
+        }, { passive: true });
+    }
+
+    if (toggle && links) {
+        toggle.addEventListener('click', function () {
+            var open = links.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!navbar.contains(e.target)) {
+                links.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+})();
+</script>

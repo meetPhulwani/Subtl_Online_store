@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../config/multer-config');
-const multer = require('multer');
 const productModel = require('../models/productModel');
+const isOwnerLoggedIn = require('../middlewares/isOwnerLoggedIn');
 
 
-router.post('/create',upload.single("image"), async function (req, res) {
+router.post('/create', isOwnerLoggedIn, upload.single("image"), async function (req, res) {
 try {
         let { name, price, discount, bgcolor, panelcolor, textcolor } = req.body;
 
@@ -14,14 +14,14 @@ try {
             return res.redirect('/owners/admin');
         }
 
-        let product = await productModel.create({
+        await productModel.create({
             image: {
                 data: req.file.buffer,
                 contentType: req.file.mimetype
             },
             name,
-            price,
-            discount,
+            price: Number(price),
+            discount: Number(discount) || 0,
             bgcolor,
             panelcolor,
             textcolor

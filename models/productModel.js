@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     bgcolor: String,
     panelcolor: String,
     textcolor: String
-});
+}, { timestamps: true });
 
 
 module.exports = mongoose.model("product", productSchema);

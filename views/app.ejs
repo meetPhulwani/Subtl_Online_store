@@ -1,59 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUBTL</title>
-    <style>
-        *{
-            margin: 0;
-        }
-            body{
-            display:flex;
-            align-items:center;
-            height:720px;
-            background:linear-gradient(to right,white,rgb(199,255,193));
-        }
-        img{
-            width: 1100px;
-            z-index: -1;
-            position: relative;
-            left: 230px;
-
-        }
-        #btn{
-            position: absolute;
-            top: 470px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width:1100px
-        }
-        button{
-            outline: none;
-            box-shadow: none;
-            border: solid 4px #89e5a1;
-            height: 40px;
-            width: 200px;
-            font-size: larger;
-            border-radius: 8px;
-            background-color:rgba(0, 0, 0, 0) ;
-            color: rgb(0, 0, 0);
-            cursor: pointer;
-            position: relative;
-            left: 220px;
-        }
-    </style>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body>
-    <div>
-    <img src="/subtl_black.png" alt="logo">
-    <div id="btn">
-    <button class="btn"><b><a href="/login" style="color: black;text-decoration: none;">ENTER STORE</a></b></button>
+
+<section class="entrance" id="entrance">
+    <div class="entrance__bg">
+        <div class="entrance__gradient"></div>
+        <div class="entrance__orb entrance__orb--1"></div>
+        <div class="entrance__orb entrance__orb--2"></div>
+        <div class="entrance__grain"></div>
+        <div class="entrance__vignette"></div>
     </div>
+
+    <div class="entrance__content">
+        <img src="/subtl_black.svg" alt="SUBTL" class="entrance__logo">
+
+        <p class="entrance__tagline">Quietly Swanky</p>
+
+        <div class="entrance__cta">
+            <a href="/login" class="entrance__btn" id="enterBtn">
+                <span>Enter Store</span>
+            </a>
+        </div>
     </div>
-    <script>
-        const btn = document.querySelector(".btn")
-    </script>
+</section>
+
+<script>
+(function () {
+    var btn = document.getElementById('enterBtn');
+    var entrance = document.getElementById('entrance');
+
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        entrance.classList.add('exiting');
+        setTimeout(function () {
+            window.location.href = '/login';
+        }, 650);
+    });
+})();
+</script>
+
 </body>
 </html>

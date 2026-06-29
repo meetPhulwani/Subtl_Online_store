@@ -1,6 +1,7 @@
 const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../utils/generateTokens');
+const cookieOptions = require('../utils/cookieOptions');
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 
@@ -22,14 +23,11 @@ module.exports.registerUser = async (req, res) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        let user = await userModel.create({
+        await userModel.create({
             fullName,
             email,
             password: hash,
         });
-
-        let token = generateToken(user);
-        res.cookie("token", token);
 
         req.flash("success", "Account created! Please login now.");
         return res.redirect("/login");
@@ -59,14 +57,14 @@ module.exports.loginUser = async (req, res) => {
         }
 
         let token = generateToken(user);
-        res.cookie("token", token);
+        res.cookie("token", token, cookieOptions.user);
 
         req.flash("success", "Logged in successfully!");
         return res.redirect("/shop");
 
     } catch (err) {
-        console.log(err);
-        req.flash("error", "Something went wrong");
+        console.error("Login error:", err.message);
+        req.flash("error", "Something went wrong. Is the database running?");
         return res.redirect("/login");
     }
 };
@@ -91,19 +89,18 @@ module.exports.forgotPassword = async (req, res) => {
 
         const user = await userModel.findOne({ email });
 
-        // IMPORTANT: same response even if user not found
         if (!user) {
             req.flash("success", "If the email exists, a reset link has been sent");
-            return res.redirect("/loginPg.ejs");
+            return res.redirect("/login");
         }
 
         const token = crypto.randomBytes(32).toString("hex");
 
         user.resetPasswordToken = token;
-        user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 min
+        user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        const resetLink = `http://localhost:3000/users/reset-password/${token}`;
+        const resetLink = `${req.protocol}://${req.get("host")}/users/reset-password/${token}`;
 
         await sendEmail(
             user.email,
@@ -112,14 +109,15 @@ module.exports.forgotPassword = async (req, res) => {
         );
 
         req.flash("success", "Password reset link sent to your email");
-        res.redirect("/loginPg.ejs");
+        res.redirect("/login");
 
     } catch (err) {
         console.log(err);
         req.flash("error", "Something went wrong");
-        res.redirect("/loginPg.ejs");
+        res.redirect("/login");
     }
 };
+
 module.exports.resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
@@ -132,7 +130,7 @@ module.exports.resetPassword = async (req, res) => {
 
         if (!user) {
             req.flash("error", "Invalid or expired link");
-            return res.redirect("/loginPg.ejs");
+            return res.redirect("/login");
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -144,11 +142,11 @@ module.exports.resetPassword = async (req, res) => {
         await user.save();
 
         req.flash("success", "Password reset successful. Please login.");
-        res.redirect("/loginPg.ejs");
+        res.redirect("/login");
 
     } catch (err) {
         console.log(err);
         req.flash("error", "Password reset failed");
-        res.redirect("/loginPg.ejs");
+        res.redirect("/login");
     }
 };
