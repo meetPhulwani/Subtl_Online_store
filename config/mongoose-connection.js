@@ -8,7 +8,7 @@ mongoose
 .connect(dbUri)
 .then(()=>{
     debgr("connected");
-    console.log("MongoDB connected");
+    console.log("Connected to database:", mongoose.connection.name);
 })
 .catch((err)=>{
     debgr(err);
