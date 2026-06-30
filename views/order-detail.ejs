@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SUBTL | Order #<%= order._id.toString().slice(-8).toUpperCase() %></title>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body class="store">
+
+    <%- include('partials/flash') %>
+    <%- include('partials/navbar', { active: 'orders' }) %>
+
+    <div class="page">
+        <% if (justPaid) { %>
+        <div class="success-banner animate-in">
+            <i class="fa-solid fa-circle-check"></i>
+            Payment successful — thank you for your order!
+        </div>
+        <% } %>
+
+        <div class="page-header order-detail-header">
+            <div>
+                <h1>Order #<%= order._id.toString().slice(-8).toUpperCase() %></h1>
+                <p>Placed on <%= new Date(order.createdAt).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+            </div>
+            <span class="order-badge order-badge--<%= order.payment.status %>"><%= order.payment.status %></span>
+        </div>
+
+        <div class="order-detail-layout">
+            <div class="order-detail-main">
+                <!-- Timeline -->
+                <div class="card card-body">
+                    <h3 class="section-title">Delivery Timeline</h3>
+                    <div class="timeline">
+                        <% const steps = ['confirmed', 'processing', 'shipped', 'delivered'];
+                           const labels = { confirmed: 'Order Confirmed', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered' };
+                           const currentIdx = steps.indexOf(order.status);
+                        %>
+                        <% steps.forEach(function(step, i) { %>
+                        <div class="timeline-step <%= i <= currentIdx ? 'timeline-step--done' : '' %> <%= i === currentIdx ? 'timeline-step--active' : '' %>">
+                            <div class="timeline-dot"></div>
+                            <span><%= labels[step] %></span>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="card card-body">
+                    <h3 class="section-title">Items</h3>
+                    <% order.items.forEach(function(item) { %>
+                    <div class="invoice-row">
+                        <div>
+                            <strong><%= item.name %></strong>
+                            <span class="invoice-qty">Qty: <%= item.quantity %></span>
+                        </div>
+                        <span>Rs.<%= item.price * item.quantity %></span>
+                    </div>
+                    <% }) %>
+                </div>
+
+                <!-- Invoice -->
+                <div class="card card-body invoice-box">
+                    <h3 class="section-title">Invoice</h3>
+                    <div class="price-row"><span>Subtotal</span><span>Rs.<%= order.subtotal %></span></div>
+                    <div class="price-row discount"><span>Discounts</span><span>- Rs.<%= order.productDiscount + order.extraDiscount %></span></div>
+                    <div class="price-row"><span>Delivery</span><span><%= order.deliveryFee === 0 ? 'FREE' : 'Rs.' + order.deliveryFee %></span></div>
+                    <div class="price-row"><span>Platform Fee</span><span>Rs.<%= order.platformFee %></span></div>
+                    <div class="price-row total"><span>Total Paid</span><span>Rs.<%= order.total %></span></div>
+                    <% if (order.payment.razorpayPaymentId) { %>
+                    <p class="invoice-meta">Payment ID: <%= order.payment.razorpayPaymentId %></p>
+                    <% } %>
+                </div>
+            </div>
+
+            <aside class="card card-body order-detail-aside">
+                <h3 class="section-title">Delivery Address</h3>
+                <p class="address-block">
+                    <strong><%= order.deliveryAddress.fullName %></strong><br>
+                    <%= order.deliveryAddress.addressLine %><br>
+                    <%= order.deliveryAddress.city %> — <%= order.deliveryAddress.pincode %><br>
+                    <%= order.deliveryAddress.phone %>
+                </p>
+                <a href="/orders" class="btn btn-outline btn-block" style="margin-top: var(--s3);">All Orders</a>
+            </aside>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script src="/js/ui.js"></script>
+</body>
+</html>

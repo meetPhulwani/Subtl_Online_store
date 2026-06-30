@@ -95,6 +95,21 @@
     .admin-sidebar {
         position: static;
         height: auto;
+        padding: var(--s3);
+    }
+    .admin-main {
+        padding: clamp(var(--s3), 4vw, var(--s4));
     }
     .form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .admin-nav {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .admin-nav a.logout {
+        grid-column: 1 / -1;
+    }
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SUBTL | My Orders</title>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body class="store">
+
+    <%- include('partials/flash') %>
+    <%- include('partials/navbar', { active: 'orders' }) %>
+
+    <div class="page">
+        <div class="page-header">
+            <h1>My Orders</h1>
+            <p>Track and manage your purchases</p>
+        </div>
+
+        <% if (!orders || orders.length === 0) { %>
+            <div class="card">
+                <div class="empty-state">
+                    <div class="icon">📦</div>
+                    <h3>No orders yet</h3>
+                    <p>When you purchase something, it will appear here.</p>
+                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="orders-list">
+                <% orders.forEach(function(order) { %>
+                <a href="/orders/<%= order._id %>" class="order-card card">
+                    <div class="order-card__top">
+                        <div>
+                            <span class="order-card__id">#<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                            <span class="order-card__date"><%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                        </div>
+                        <span class="order-badge order-badge--<%= order.payment.status %>"><%= order.payment.status %></span>
+                    </div>
+                    <div class="order-card__items">
+                        <%= order.items.length %> item<%= order.items.length !== 1 ? 's' : '' %>
+                    </div>
+                    <div class="order-card__bottom">
+                        <span class="order-card__status"><%= order.status %></span>
+                        <span class="order-card__total">Rs.<%= order.total %></span>
+                    </div>
+                </a>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script src="/js/ui.js"></script>
+</body>
+</html>

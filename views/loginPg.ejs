@@ -132,10 +132,16 @@
 
     signUpBtn.addEventListener("click", () => setMode(!isLogin));
 
+    form.addEventListener("submit", function () {
+        loginBtn.classList.add("is-loading");
+        loginBtn.disabled = true;
+    });
+
     setTimeout(() => {
         document.querySelectorAll(".flash-box").forEach(box => box.remove());
     }, 4000);
 </script>
+<script src="/js/ui.js"></script>
 
 </body>
 </html>

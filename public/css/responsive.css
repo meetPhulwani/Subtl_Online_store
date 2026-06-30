@@ -1,0 +1,186 @@
+/* ═══════════════════════════════════════════
+   ADAPTIVE LAYER — One design, every screen
+   320 · 375 · 390 · 414 · 480 · 768 · 1024 · 1280 · 1440 · 1920
+   ═══════════════════════════════════════════ */
+
+/* ── Toast notifications ── */
+.subtl-toast {
+    position: fixed;
+    bottom: var(--s3);
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    padding: 12px var(--s3);
+    border-radius: var(--radius);
+    font-size: var(--fluid-sm);
+    font-weight: 500;
+    color: var(--white);
+    z-index: 10000;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base), transform var(--transition-base);
+    max-width: calc(100vw - var(--s4));
+    text-align: center;
+}
+
+.subtl-toast--visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.subtl-toast--success { background: var(--black); }
+.subtl-toast--error { background: var(--error); }
+
+/* ── Nav overlay + drawer ── */
+.nav-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 98;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+
+.nav-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+body.nav-open { overflow: hidden; }
+
+.navbar__toggle.active span:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+}
+
+.navbar__toggle.active span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.navbar__toggle.active span:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* ── Auth loading ── */
+.auth-submit.is-loading {
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.auth-submit.is-loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    margin-left: var(--s1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Form validation ── */
+.input.is-invalid,
+.auth-input.is-invalid {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+
+.field-error {
+    font-size: var(--fluid-xs);
+    color: var(--error);
+    margin-top: 4px;
+}
+
+/* ── iOS input zoom prevention ── */
+@media (max-width: 767px) {
+    .input,
+    .auth-input,
+    .sort-select,
+    select,
+    textarea {
+        font-size: max(16px, var(--fluid-sm));
+    }
+}
+
+/* ── Touch: replace hover lift with subtle active ── */
+@media (hover: none) {
+    .product-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .product-card:active {
+        transform: scale(0.99);
+    }
+
+    .btn-primary:hover,
+    .btn-outline:hover {
+        transform: none;
+    }
+
+    .btn-primary:active {
+        opacity: 0.88;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .entrance__gradient,
+    .entrance__orb,
+    .auth-visual__bg {
+        animation: none !important;
+    }
+}
+
+/* ── Ultra-wide ── */
+@media (min-width: 1920px) {
+    :root {
+        --page-max: 90rem;
+    }
+}
+
+@media (min-width: 1440px) {
+    :root {
+        --page-gutter: clamp(1.5rem, 2.5vw, 2.5rem);
+    }
+}
+
+/* ── Small phones ── */
+@media (max-width: 414px) {
+    .flash-box {
+        top: var(--s2);
+        left: var(--page-gutter);
+        right: var(--page-gutter);
+        transform: none;
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (max-width: 375px) {
+    .entrance__btn {
+        min-width: min(100%, 260px);
+    }
+}
+
+@media (max-width: 320px) {
+    .navbar__logo img { height: 22px; }
+}

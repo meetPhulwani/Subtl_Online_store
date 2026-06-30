@@ -4,6 +4,12 @@ const isLoggedIn = require('../middlewares/isLoggedIn');
 const productModel = require('../models/productModel');
 const userModel = require('../models/userModel');
 const calculateCartTotals = require('../utils/cartTotals');
+const {
+    createRazorpayOrder,
+    verifyPayment,
+    getOrders,
+    getOrderDetail,
+} = require('../controllers/paymentController');
 
 router.get("/", (req, res) => {
     res.render("app");
@@ -128,34 +134,28 @@ router.get('/checkout', isLoggedIn, async (req, res) => {
     res.render("checkout", {
         cartItems: user.cart,
         ...totals,
+        user: req.user,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID || "",
         success: req.flash("success"),
         error: req.flash("error"),
     });
 });
 
+router.post("/checkout/create-order", isLoggedIn, createRazorpayOrder);
+router.post("/checkout/verify", isLoggedIn, verifyPayment);
+
+router.get("/payment/failed", isLoggedIn, (req, res) => {
+    res.render("payment-failed", {
+        error: req.flash("error"),
+    });
+});
+
+router.get("/orders", isLoggedIn, getOrders);
+router.get("/orders/:id", isLoggedIn, getOrderDetail);
+
 router.post('/checkout', isLoggedIn, async (req, res) => {
-    try {
-        const user = await userModel
-            .findById(req.user._id)
-            .populate("cart.product");
-
-        if (!user.cart.length) {
-            req.flash("error", "Your cart is empty");
-            return res.redirect("/cart");
-        }
-
-        const productIds = user.cart.map((item) => item.product._id);
-        user.order.push(...productIds);
-        user.cart = [];
-        await user.save();
-
-        req.flash("success", "Order placed successfully!");
-        res.redirect("/shop");
-    } catch (err) {
-        console.log(err);
-        req.flash("error", "Checkout failed");
-        res.redirect("/checkout");
-    }
+    req.flash("error", "Please use secure payment at checkout");
+    res.redirect("/checkout");
 });
 
 router.get('/profile', isLoggedIn, async (req, res) => {

@@ -34,6 +34,10 @@
 
                 <h3 class="section-title section-title--spaced">Order History</h3>
 
+                <div style="margin-bottom: var(--s3);">
+                    <a href="/orders" class="btn btn-outline btn-sm">View All Orders</a>
+                </div>
+
                 <% if (user.order && user.order.length > 0) { %>
                     <div class="order-list">
                         <% user.order.forEach(function(product) { %>
@@ -56,6 +60,7 @@
     </div>
 
     <%- include('partials/footer') %>
+    <script src="/js/ui.js"></script>
 
 </body>
 </html>

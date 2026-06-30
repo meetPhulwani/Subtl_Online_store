@@ -4,6 +4,7 @@
     <title>SUBTL | Checkout</title>
     <%- include('partials/head') %>
     <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/orders.css">
 </head>
 <body class="store">
 
@@ -13,41 +14,92 @@
     <div class="page">
         <div class="page-header">
             <h1>Checkout</h1>
-            <p>Review and confirm your order</p>
+            <p>Secure payment powered by Razorpay</p>
         </div>
 
-        <div class="card checkout-card">
-            <div class="card-body">
-                <h3 class="section-title">Order Summary</h3>
+        <div class="checkout-layout">
+            <div class="card checkout-address">
+                <div class="card-body">
+                    <h3 class="section-title">Delivery Address</h3>
+                    <form id="checkoutForm" novalidate>
+                        <div class="form-grid-responsive">
+                            <div class="auth-field">
+                                <label class="form-label" for="fullName">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" class="input"
+                                    value="<%= user.fullName || '' %>" required placeholder="Your name">
+                            </div>
+                            <div class="auth-field">
+                                <label class="form-label" for="phone">Phone</label>
+                                <input type="tel" id="phone" name="phone" class="input"
+                                    pattern="[0-9]{10}" required placeholder="10-digit mobile">
+                            </div>
+                            <div class="auth-field form-full">
+                                <label class="form-label" for="addressLine">Address</label>
+                                <input type="text" id="addressLine" name="addressLine" class="input"
+                                    required placeholder="Street, building, area">
+                            </div>
+                            <div class="auth-field">
+                                <label class="form-label" for="city">City</label>
+                                <input type="text" id="city" name="city" class="input" required placeholder="City">
+                            </div>
+                            <div class="auth-field">
+                                <label class="form-label" for="pincode">Pincode</label>
+                                <input type="text" id="pincode" name="pincode" class="input"
+                                    pattern="[0-9]{6}" required placeholder="6-digit pincode">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-                <% cartItems.forEach(function(item) { %>
-                    <% if (item.product) { %>
-                    <div class="price-row">
-                        <span><%= item.product.name %> &times; <%= item.quantity %></span>
-                        <span>Rs.<%= item.product.price * item.quantity %></span>
-                    </div>
-                    <% } %>
-                <% }) %>
+            <div class="card summary-box checkout-summary">
+                <div class="card-body">
+                    <h3 class="section-title">Order Summary</h3>
 
-                <div class="price-row"><span>Subtotal</span><span>Rs.<%= subtotal %></span></div>
-                <div class="price-row discount"><span>Product Discount</span><span>- Rs.<%= productDiscount %></span></div>
-                <div class="price-row discount"><span>Extra Discount</span><span>- Rs.<%= extraDiscount %></span></div>
-                <div class="price-row"><span>Delivery</span><span><%= deliveryFee === 0 ? 'FREE' : 'Rs.' + deliveryFee %></span></div>
-                <div class="price-row"><span>Platform Fee</span><span>Rs.<%= platformFee %></span></div>
-                <div class="price-row total"><span>Total</span><span>Rs.<%= total %></span></div>
+                    <% cartItems.forEach(function(item) { %>
+                        <% if (item.product) { %>
+                        <div class="price-row">
+                            <span><%= item.product.name %> &times; <%= item.quantity %></span>
+                            <span>Rs.<%= item.product.price * item.quantity %></span>
+                        </div>
+                        <% } %>
+                    <% }) %>
 
-                <form action="/checkout" method="POST" class="checkout-form">
-                    <button type="submit" class="btn btn-primary btn-block btn-lg">
-                        <i class="fa-solid fa-lock"></i> Place Order
+                    <div class="price-row"><span>Subtotal</span><span>Rs.<%= subtotal %></span></div>
+                    <div class="price-row discount"><span>Product Discount</span><span>- Rs.<%= productDiscount %></span></div>
+                    <div class="price-row discount"><span>Extra Discount</span><span>- Rs.<%= extraDiscount %></span></div>
+                    <div class="price-row"><span>Delivery</span><span><%= deliveryFee === 0 ? 'FREE' : 'Rs.' + deliveryFee %></span></div>
+                    <div class="price-row"><span>Platform Fee</span><span>Rs.<%= platformFee %></span></div>
+                    <div class="price-row total"><span>Total</span><span id="checkoutTotal">Rs.<%= total %></span></div>
+
+                    <button type="button" id="payBtn" class="btn btn-primary btn-block btn-lg checkout-pay-btn"
+                        data-total="<%= total %>"
+                        data-key="<%= razorpayKeyId %>"
+                        <%= !razorpayKeyId ? 'disabled' : '' %>>
+                        <span class="btn-text"><i class="fa-solid fa-lock"></i> Pay Rs.<%= total %></span>
+                        <span class="btn-loader hide"><i class="fa-solid fa-circle-notch fa-spin"></i> Processing…</span>
                     </button>
-                </form>
 
-                <a href="/cart" class="back-link checkout-back">&larr; Back to bag</a>
+                    <% if (!razorpayKeyId) { %>
+                        <p class="checkout-notice">Payment gateway not configured. Add RAZORPAY keys to .env</p>
+                    <% } %>
+
+                    <a href="/cart" class="back-link checkout-back">&larr; Back to bag</a>
+                </div>
             </div>
         </div>
     </div>
 
+    <form id="verifyForm" action="/checkout/verify" method="POST" class="hide">
+        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+    </form>
+
     <%- include('partials/footer') %>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/checkout.js"></script>
 </body>
 </html>
